@@ -30,6 +30,8 @@ final class Utils {
   private static final String TAG = "Earl.Utils";
   private static final DateFormat rfc822DateTimeFormat = new SimpleDateFormat(
       "EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+  private static final DateFormat rfc822DateTimeFormatNoSeconds = new SimpleDateFormat(
+      "EEE, dd MMM yyyy HH:mm Z", Locale.ENGLISH);
   private static final DateFormat iso8601DateTimeFormat = new SimpleDateFormat(
       "yyyy-MM-dd'T'HH:mm:ss.SSSz", Locale.ENGLISH);
   private static final DateFormat RFC3339Tz = new SimpleDateFormat(
@@ -83,7 +85,11 @@ final class Utils {
     try {
       return rfc822DateTimeFormat.parse(dateString);
     } catch (ParseException ignored) {
-      return null;
+      try {
+        return rfc822DateTimeFormatNoSeconds.parse(dateString);
+      } catch (ParseException ignored2) {
+        return null;
+      }
     }
   }
 
@@ -139,11 +145,14 @@ final class Utils {
    */
   @Nullable
   private static Date parseRFC3339Date(@NonNull String string) {
+//    Log.d(TAG, "parseRFC3339Date: " + string);
+
     try {
       //if there is no time zone, we don't need to do any special parsing.
       if (string.endsWith("Z")) {
         string = string.replace("Z", "+00:00");
-      } else {
+      }
+      else {
         char timezoneSign = string.contains("+") ? '+' : '-';
 
         //step one, split off the timezone.
